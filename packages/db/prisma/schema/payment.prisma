@@ -1,0 +1,24 @@
+model Payment {
+    id String @id @default(uuid(7)) @db.Uuid
+    provider PaymentProvider @default(STRIPE)
+    transactionId String @unique
+    amount Decimal
+    status PaymentStatus @default(PENDING)
+    orderId String @unique @db.Uuid
+    order Order @relation(fields: [orderId], references: [id])
+    
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("payment")
+}
+
+enum PaymentProvider {
+    STRIPE
+}
+
+enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+}

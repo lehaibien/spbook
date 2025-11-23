@@ -1,0 +1,52 @@
+name: spbook
+
+services:
+  postgres:
+    image: postgres
+    container_name: spbook-postgres
+    environment:
+      POSTGRES_DB: spbook
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - spbook_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: spbook-rustfs
+    restart: unless-stopped
+    environment:
+      - RUSTFS_ACCESS_KEY=spbook
+      - RUSTFS_SECRET_KEY=${RUSTFS_SECRET_KEY}
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_CORS_ALLOWED_ORIGINS=*
+      - RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS=*
+      - RUSTFS_LOG_LEVEL=debug
+    ports:
+      - "9000:9000"
+      - "9001:9001" # Console
+    volumes:
+      - spbook_rustfs_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh",
+          "-c",
+          "curl -f http://localhost:9000/health && curl -f http://localhost:9001/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  spbook_postgres_data:
+  spbook_rustfs_data:

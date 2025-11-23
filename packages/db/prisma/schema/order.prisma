@@ -1,0 +1,27 @@
+model Order {
+    id String @id @default(uuid(7)) @db.Uuid
+    userId String
+    user User @relation(fields: [userId], references: [id])
+    items OrderItem[]
+    paymentId String? @unique @db.Uuid
+    payment Payment?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("order")
+}
+
+model OrderItem {
+    id String @id @default(uuid(7)) @db.Uuid
+    orderId String @db.Uuid
+    order Order @relation(fields: [orderId], references: [id])
+    bookId String @db.Uuid
+    book Book @relation(fields: [bookId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([orderId, bookId])
+    @@map("order_item")
+}

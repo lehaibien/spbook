@@ -1,0 +1,72 @@
+model Author {
+    id String @id @default(uuid(7)) @db.Uuid
+    name String
+    bio String
+    dateOfBirth DateTime
+    image String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    books BookAuthor[]
+
+    @@map("author")
+}
+
+model Publisher {
+    id String @id @default(uuid(7)) @db.Uuid
+    name String
+    image String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    books Book[]
+
+    @@map("publisher")
+}
+
+model Category {
+    id String @id @default(uuid(7)) @db.Uuid
+    name String
+    image String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    books BookCategory[]
+
+    @@map("category")
+}
+
+model Book {
+    id String @id @default(uuid(7)) @db.Uuid
+    isbn String @unique
+    title String
+    slug String @unique
+    description String
+    images String[] @default([])
+    language String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    publisherId String @db.Uuid
+    publisher Publisher @relation(fields: [publisherId], references: [id])
+    authors BookAuthor[]
+    categories BookCategory[]
+    orders OrderItem[]
+    @@map("book")
+}
+
+model BookAuthor {
+    bookId String @db.Uuid
+    authorId String @db.Uuid
+    book Book @relation(fields: [bookId], references: [id])
+    author Author @relation(fields: [authorId], references: [id])
+
+    @@id([bookId, authorId])
+    @@map("book_author")
+}
+
+model BookCategory {
+    bookId String @db.Uuid
+    categoryId String @db.Uuid
+    book Book @relation(fields: [bookId], references: [id])
+    category Category @relation(fields: [categoryId], references: [id])
+
+    @@id([bookId, categoryId])
+    @@map("book_category")
+}
